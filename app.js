@@ -6,7 +6,7 @@ const file = JSON.parse(fs.readFileSync("./movies.json"));
 
 app.use(express.json());
 
-app.get("/api/v1/movies", (req, res) => {
+const getAllMovies = (req, res) => {
   res.status(200).json({
     status: "success",
     count: file.length,
@@ -14,15 +14,15 @@ app.get("/api/v1/movies", (req, res) => {
       movies: file,
     },
   });
-});
+};
 
-app.get(["/api/v1/movies/:id", "/api/v1/movies/:id/:name"], (req, res) => {
+const getSingleMovie = (req, res) => {
   const askedId = req.params.id;
   const obj = file.find((item) => item.id === +askedId);
 
   if (!obj) {
     res.status(404).json({
-      status: "failled",
+      status: "failed",
       message: "Not found",
     });
   } else {
@@ -33,9 +33,9 @@ app.get(["/api/v1/movies/:id", "/api/v1/movies/:id/:name"], (req, res) => {
       },
     });
   }
-});
+};
 
-app.post("/api/v1/movies", (req, res) => {
+const addANewMovie = (req, res) => {
   const id = file[file.length - 1].id + 1;
   const obj = Object.assign({ id }, req.body);
   file.push(obj);
@@ -51,16 +51,24 @@ app.post("/api/v1/movies", (req, res) => {
       },
     });
   });
-});
+};
 
-app.put("/api/v1/movies/:id", (req, res) => {
+const updateAMovieByPut = (req, res) => {
   const id = +req.params.id;
+
+  if (isNaN(id)) {
+    return res.status(400).send({
+      status: "failed",
+      message: "id must be a number",
+    });
+  }
+
   const obj = file.find((item) => item.id === id);
 
   console.log("Hit");
   if (!obj) {
     res.status(404).json({
-      status: "failled",
+      status: "failed",
       message: "Not found",
     });
   } else {
@@ -72,7 +80,7 @@ app.put("/api/v1/movies/:id", (req, res) => {
       if (err) {
         res.status(500).json({
           status: "success",
-          message: "Filed to write file",
+          message: "Failed to write file",
         });
       } else {
         res.status(200).json({
@@ -84,16 +92,24 @@ app.put("/api/v1/movies/:id", (req, res) => {
       }
     });
   }
-});
+};
 
-app.patch("/api/v1/movies/:id", (req, res) => {
+const updateAmovieByPatch = (req, res) => {
   const id = +req.params.id;
+
+  if (isNaN(id)) {
+    return res.status(400).send({
+      status: "failed",
+      message: "id must be a number",
+    });
+  }
+
   const obj = file.find((item) => item.id === id);
 
   console.log("Hit");
   if (!obj) {
     res.status(404).json({
-      status: "failled",
+      status: "failed",
       message: "Not found",
     });
   } else {
@@ -105,7 +121,7 @@ app.patch("/api/v1/movies/:id", (req, res) => {
       if (err) {
         res.status(500).json({
           status: "success",
-          message: "Filed to write file",
+          message: "Failed to write file",
         });
       } else {
         res.status(200).json({
@@ -117,14 +133,15 @@ app.patch("/api/v1/movies/:id", (req, res) => {
       }
     });
   }
-});
+};
 
-app.delete("/api/v1/movies/:id", (req, res) => {
+const deleteAMovie = (req, res) => {
   const id = +req.params.id;
-  if (!id) {
+
+  if (isNaN(id)) {
     return res.status(400).send({
       status: "failed",
-      message: "Valid id is required",
+      message: "id must be a number",
     });
   }
 
@@ -143,17 +160,24 @@ app.delete("/api/v1/movies/:id", (req, res) => {
     if (err) {
       return res.status(500).send({
         status: "failed",
-        message: "Filed to write file",
+        message: "Failed to write file",
       });
     }
-    res.status(200).json({
+    res.status(204).json({
       status: "success",
       data: {
-        movies: file,
+        movies: null,
       },
     });
   });
-});
+};
+
+app.route("/api/v1/movies").get(getAllMovies).post(addANewMovie);
+app.route("/api/v1/movies/:id")
+  .get(getSingleMovie)
+  .put(updateAMovieByPut)
+  .patch(updateAmovieByPatch)
+  .delete(deleteAMovie);
 
 const PORT = 3000;
 app.listen(PORT, () => {
