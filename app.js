@@ -1,15 +1,34 @@
 const express = require("express");
+const morgan = require("morgan");
 const fs = require("fs");
 const app = express();
 
 const file = JSON.parse(fs.readFileSync("./movies.json"));
 
 app.use(express.json());
+app.use((req, res, next)=> {
+  req.requestedAt = new Date().toISOString();
+  next();
+});
+app.use(morgan("dev"));
+
+const customMiddleware1 = (req, res, next) => {
+  console.log("Midleware is Called 1");
+  next();
+}
+
+const customMiddleware2 = (req, res, next) => {
+  console.log("Midleware is Called 2");
+  next();
+}
+
+app.use(customMiddleware1);
 
 const getAllMovies = (req, res) => {
   res.status(200).json({
     status: "success",
     count: file.length,
+    requestedAt: req.requestedAt,
     data: {
       movies: file,
     },
@@ -28,6 +47,7 @@ const getSingleMovie = (req, res) => {
   } else {
     res.status(200).json({
       status: "success",
+      requestedAt: req.requestedAt,
       data: {
         movie: obj,
       },
@@ -173,6 +193,9 @@ const deleteAMovie = (req, res) => {
 };
 
 app.route("/api/v1/movies").get(getAllMovies).post(addANewMovie);
+
+app.use(customMiddleware2);
+
 app.route("/api/v1/movies/:id")
   .get(getSingleMovie)
   .put(updateAMovieByPut)
