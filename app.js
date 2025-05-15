@@ -16,7 +16,4 @@ app.use(customMiddleware1);
 app.use("/api/v1/movies", router);
 app.use(customMiddleware2);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log("server has started...");
-});
+module.exports = app;
