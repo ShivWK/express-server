@@ -1,0 +1,19 @@
+body {
+    background-color: rgb(5, 3, 110);
+}
+
+div {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    background-color: antiquewhite;
+    font-weight: 500;
+    max-width: 1024px;
+    /* margin-inline: auto; */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding-inline: 2% ;
+}

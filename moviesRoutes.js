@@ -2,14 +2,17 @@ const express = require("express");
 const morgan = require("morgan");
 const router = express.Router();
 const {
+  checkId,
   getAllMovies,
   getSingleMovie,
   addANewMovie,
   updateAMovieByPut,
   updateAmovieByPatch,
   deleteAMovie,
+  bodyValidater,
 } = require("./controllers/moviesControllers");
 
+router.param("id", checkId);
 router.use(express.json());
 router.use((req, res, next) => {
   req.requestedAt = new Date().toISOString();
@@ -17,7 +20,7 @@ router.use((req, res, next) => {
 });
 router.use(morgan("dev"));
 
-router.route("/").get(getAllMovies).post(addANewMovie);
+router.route("/").get(getAllMovies).post(bodyValidater, addANewMovie);
 router
   .route("/:id")
   .get(getSingleMovie)

@@ -12,8 +12,9 @@ const customMiddleware2 = (req, res, next) => {
   next();
 }
 
+app.use(express.static("./public"));
 app.use(customMiddleware1);
-app.use("/api/v1/movies", router);
 app.use(customMiddleware2);
+app.use("/api/v1/movies", router);
 
 module.exports = app;
