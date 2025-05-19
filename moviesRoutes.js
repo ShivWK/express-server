@@ -18,7 +18,7 @@ router.use((req, res, next) => {
   req.requestedAt = new Date().toISOString();
   next();
 });
-router.use(morgan("dev"));
+// router.use(morgan("dev"));
 
 router.route("/").get(getAllMovies).post(bodyValidater, addANewMovie);
 router

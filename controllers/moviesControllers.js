@@ -1,6 +1,27 @@
 const fs = require("fs");
 const file = JSON.parse(fs.readFileSync("./movies.json"));
 
+exports.checkToken = (req, res, next) => {
+  console.log(req, res);
+
+  const authToken = req.headers.authorization;
+
+  if (!authToken) {
+    return res.status(401).json({
+      status: "failed",
+      message: "Unauthorized: No token provided"
+    })
+  }
+
+  const token = authToken.splite(" ")[1];
+
+  if (token !== "abc123") {
+    return res.status(403).json({ status: "failed", message: "Forbidden: Invalid token"})
+  }
+
+  next();
+}
+
 exports.checkId = (req, res, next, value) => {
   if (isNaN(value)) {
     return res.status(400).send({
