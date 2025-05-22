@@ -3,6 +3,7 @@ const app = express();
 const router = require("./moviesRoutes");
 const fs = require("fs");
 const cors = require("cors");
+const multer = require("multer");
 // const checkToken= require("./controllers/moviesControllers")
 
 let file = JSON.parse(fs.readFileSync("./form.json"));
@@ -28,6 +29,8 @@ const checkToken = (req, res, next) => {
   next();
 }
 
+const upload = multer();
+
 app.use(cors()); // study it well
 app.use(checkToken);
 app.use(express.json());
@@ -42,7 +45,7 @@ const customMiddleware2 = (req, res, next) => {
   next();
 };
 
-app.post("/api/formData", (req, res) => {
+app.post("/api/formData", upload.any(), (req, res) => {
   let obj;
 
   if (file.length === 0) {
@@ -53,13 +56,16 @@ app.post("/api/formData", (req, res) => {
   } else {
     const id = file[file.length - 1].id + 1;
     obj = Object.assign({ id }, req.body);
+    if(req.files && req.files.length > 0) {
+      obj.file = req.files[0];
+    }
 
     file.push(obj);
   }
 
   fs.writeFile("./form.json", JSON.stringify(file), (err) => {
     if (err) {
-      res.status(500).send({
+      res.status(500).json({
         status: "Failed",
         message: "Unable to Post data",
       });
@@ -76,7 +82,7 @@ app.post("/api/formData", (req, res) => {
 
 app.get("/api/waitBaby", (req, res) => {
   setTimeout(() => {
-    res.status(200).send({
+    res.status(200).json({
       status: "success",
       message: "Sorry I'm late",
     });
@@ -85,13 +91,13 @@ app.get("/api/waitBaby", (req, res) => {
 
 app.get("/api/unstable-endpoint", (req, res) => {
   if (Math.random() < 0.5) {
-    return res.status(500).send({
+    return res.status(500).json({
       status: "failed",
       message: "Temporary server error",
     })
   }
 
-  res.status(200).send({
+  res.status(200).json({
     status: "success",
     message: "Lucky man you got it!"
   })

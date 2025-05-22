@@ -68,13 +68,6 @@ exports.getSingleMovie = (req, res) => {
   const askedId = req.params.id;
   const obj = file.find((item) => item.id === +askedId);
 
-  // if (!obj) {
-  //   return res.status(404).json({
-  //     status: "failed",
-  //     message: "Not found",
-  //   });
-  // }
-
   res.status(200).json({
     status: "success",
     requestedAt: req.requestedAt,
@@ -105,21 +98,7 @@ exports.addANewMovie = (req, res) => {
 exports.updateAMovieByPut = (req, res) => {
   const id = +req.params.id;
 
-  // if (isNaN(id)) {
-  //   return res.status(400).send({
-  //     status: "failed",
-  //     message: "id must be a number",
-  //   });
-  // }
-
   const obj = file.find((item) => item.id === id);
-
-  // if (!obj) {
-  //   return res.status(404).json({
-  //     status: "failed",
-  //     message: "Not found",
-  //   });
-  // }
 
   const index = file.indexOf(obj);
   const objToUpate = { id: obj.id, ...req.body };
@@ -144,13 +123,6 @@ exports.updateAMovieByPut = (req, res) => {
 
 exports.updateAmovieByPatch = (req, res) => {
   const id = +req.params.id;
-
-  // if (isNaN(id)) {
-  //   return res.status(400).send({
-  //     status: "failed",
-  //     message: "id must be a number",
-  //   });
-  // }
 
   const obj = file.find((item) => item.id === id);
 
@@ -183,29 +155,14 @@ exports.updateAmovieByPatch = (req, res) => {
 
 exports.deleteAMovie = (req, res) => {
   const id = +req.params.id;
-
-  // if (isNaN(id)) {
-  //   return res.status(400).send({
-  //     status: "failed",
-  //     message: "id must be a number",
-  //   });
-  // }
-
   const obj = file.find((item) => item.id === id);
-
-  // if (!obj) {
-  //   return res.status(404).send({
-  //     status: "failed",
-  //     message: "Not found",
-  //   });
-  // }
-
   const index = file.indexOf(obj);
+  
   file.splice(index, 1);
 
   fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
     if (err) {
-      return res.status(500).send({
+      return res.status(500).json({
         status: "failed",
         message: "Failed to write file",
       });
