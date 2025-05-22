@@ -1,46 +1,50 @@
 const fs = require("fs");
-const file = JSON.parse(fs.readFileSync("./movies.json"));
+const Movies = require("../Modals/movieModal");
 
-exports.checkToken = (req, res, next) => {
-  console.log(req, res);
+// const file = JSON.parse(fs.readFileSync("./movies.json"));
 
-  const authToken = req.headers.authorization;
+// Middlewares
 
-  if (!authToken) {
-    return res.status(401).json({
-      status: "failed",
-      message: "Unauthorized: No token provided"
-    })
-  }
+// exports.checkToken = (req, res, next) => {
+//   console.log(req, res);
 
-  const token = authToken.split(" ")[1];
+//   const authToken = req.headers.authorization;
 
-  if (token !== "abc123") {
-    return res.status(403).json({ status: "failed", message: "Forbidden: Invalid token"})
-  }
+//   if (!authToken) {
+//     return res.status(401).json({
+//       status: "failed",
+//       message: "Unauthorized: No token provided"
+//     })
+//   }
 
-  next();
-}
+//   const token = authToken.split(" ")[1];
 
-exports.checkId = (req, res, next, value) => {
-  if (isNaN(value)) {
-    return res.status(400).send({
-      status: "failed",
-      message: "id must be a number",
-    });
-  }
+//   if (token !== "abc123") {
+//     return res.status(403).json({ status: "failed", message: "Forbidden: Invalid token"})
+//   }
 
-  const obj = file.find((item) => item.id === +value);
+//   next();
+// }
 
-  if (!obj) {
-    return res.status(404).json({
-      status: "failed",
-      message: "Movie with the give id not found",
-    });
-  }
+// exports.checkId = (req, res, next, value) => {
+//   if (isNaN(value)) {
+//     return res.status(400).send({
+//       status: "failed",
+//       message: "id must be a number",
+//     });
+//   }
 
-  next();
-};
+//   const obj = file.find((item) => item.id === +value);
+
+//   if (!obj) {
+//     return res.status(404).json({
+//       status: "failed",
+//       message: "Movie with the give id not found",
+//     });
+//   }
+
+//   next();
+// };
 
 exports.bodyValidater = (req, res, next) => {
   if (!req?.body?.name || !req?.body?.release) {
@@ -53,125 +57,157 @@ exports.bodyValidater = (req, res, next) => {
   next();
 }
 
+// Route Handlers 
+
 exports.getAllMovies = (req, res) => {
-  res.status(200).json({
-    status: "success",
-    count: file.length,
-    requestedAt: req.requestedAt,
-    data: {
-      movies: file,
-    },
-  });
+// When worked with text JSON file
+
+  // res.status(200).json({
+  //   status: "success",
+  //   count: file.length,
+  //   requestedAt: req.requestedAt,
+  //   data: {
+  //     movies: file,
+  //   },
+  // });
+
+// Wroking with database
+
 };
 
 exports.getSingleMovie = (req, res) => {
-  const askedId = req.params.id;
-  const obj = file.find((item) => item.id === +askedId);
+// When worked with text JSON file
 
-  res.status(200).json({
-    status: "success",
-    requestedAt: req.requestedAt,
-    data: {
-      movie: obj,
-    },
-  });
+  // const askedId = req.params.id;
+  // const obj = file.find((item) => item.id === +askedId);
+
+  // res.status(200).json({
+  //   status: "success",
+  //   requestedAt: req.requestedAt,
+  //   data: {
+  //     movie: obj,
+  //   },
+  // });
+
+// Wroking with database
+
 };
 
 exports.addANewMovie = (req, res) => {
-  const id = file[file.length - 1].id + 1;
-  const obj = Object.assign({ id }, req.body);
-  file.push(obj);
+// When worked with text JSON file
+  
+  // const id = file[file.length - 1].id + 1;
+  // const obj = Object.assign({ id }, req.body);
+  // file.push(obj);
 
-  fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    if (err) {
-      console.log(err);
-    }
-    res.status(201).json({
-      status: "success",
-      data: {
-        movies: obj,
-      },
-    });
-  });
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //   }
+  //   res.status(201).json({
+  //     status: "success",
+  //     data: {
+  //       movies: obj,
+  //     },
+  //   });
+  // });
+
+// Wroking with database
+
 };
 
 exports.updateAMovieByPut = (req, res) => {
-  const id = +req.params.id;
+// When worked with text JSON file
 
-  const obj = file.find((item) => item.id === id);
+  // const id = +req.params.id;
 
-  const index = file.indexOf(obj);
-  const objToUpdate = { id: obj.id, ...req.body };
-  file[index] = objToUpdate;
+  // const obj = file.find((item) => item.id === id);
 
-  fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    if (err) {
-      res.status(500).json({
-        status: "success",
-        message: "Failed to write file",
-      });
-    } else {
-      res.status(200).json({
-        status: "success",
-        data: {
-          movie: objToUpdate,
-        },
-      });
-    }
-  });
+  // const index = file.indexOf(obj);
+  // const objToUpdate = { id: obj.id, ...req.body };
+  // file[index] = objToUpdate;
+
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     res.status(500).json({
+  //       status: "success",
+  //       message: "Failed to write file",
+  //     });
+  //   } else {
+  //     res.status(200).json({
+  //       status: "success",
+  //       data: {
+  //         movie: objToUpdate,
+  //       },
+  //     });
+  //   }
+  // });
+
+// Wroking with database
+
 };
 
 exports.updateAmovieByPatch = (req, res) => {
-  const id = +req.params.id;
+// When worked with text JSON file
 
-  const obj = file.find((item) => item.id === id);
+  // const id = +req.params.id;
 
-  if (!obj) {
-    return res.status(404).json({
-      status: "failed",
-      message: "Not found",
-    });
-  }
-  const index = file.indexOf(obj);
-  const objToUpdate = { ...obj, ...req.body };
-  file[index] = objToUpdate;
+  // const obj = file.find((item) => item.id === id);
 
-  fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    if (err) {
-      res.status(500).json({
-        status: "success",
-        message: "Failed to write file",
-      });
-    } else {
-      res.status(200).json({
-        status: "success",
-        data: {
-          movie: objToUpdate,
-        },
-      });
-    }
-  });
+  // if (!obj) {
+  //   return res.status(404).json({
+  //     status: "failed",
+  //     message: "Not found",
+  //   });
+  // }
+  // const index = file.indexOf(obj);
+  // const objToUpdate = { ...obj, ...req.body };
+  // file[index] = objToUpdate;
+
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     res.status(500).json({
+  //       status: "success",
+  //       message: "Failed to write file",
+  //     });
+  //   } else {
+  //     res.status(200).json({
+  //       status: "success",
+  //       data: {
+  //         movie: objToUpdate,
+  //       },
+  //     });
+  //   }
+  // });
+
+// Wroking with database
+
 };
 
 exports.deleteAMovie = (req, res) => {
-  const id = +req.params.id;
-  const obj = file.find((item) => item.id === id);
-  const index = file.indexOf(obj);
-  
-  file.splice(index, 1);
+// When worked with text JSON file
 
-  fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    if (err) {
-      return res.status(500).json({
-        status: "failed",
-        message: "Failed to write file",
-      });
-    }
-    res.status(204).json({
-      status: "success",
-      data: {
-        movies: null,
-      },
-    });
-  });
+  // const id = +req.params.id;
+  // const obj = file.find((item) => item.id === id);
+  // const index = file.indexOf(obj);
+  
+  // file.splice(index, 1);
+
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     return res.status(500).json({
+  //       status: "failed",
+  //       message: "Failed to write file",
+  //     });
+  //   }
+  //   res.status(204).json({
+  //     status: "success",
+  //     data: {
+  //       movies: null,
+  //     },
+  //   });
+  // });
+
+// Wroking with database
+
 };

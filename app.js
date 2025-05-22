@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const router = require("./moviesRoutes");
+const router = require("./Routes/moviesRoutes");
 const fs = require("fs");
 const cors = require("cors");
 const multer = require("multer");

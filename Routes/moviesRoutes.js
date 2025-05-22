@@ -10,9 +10,9 @@ const {
   updateAmovieByPatch,
   deleteAMovie,
   bodyValidater,
-} = require("./controllers/moviesControllers");
+} = require("../controllers/moviesControllers");
 
-router.param("id", checkId);
+// router.param("id", checkId);
 router.use(express.json());
 router.use((req, res, next) => {
   req.requestedAt = new Date().toISOString();
