@@ -20,7 +20,7 @@ router.use((req, res, next) => {
 });
 // router.use(morgan("dev"));
 
-router.route("/").get(getAllMovies).post(bodyValidater, addANewMovie);
+router.route("/").get(getAllMovies).post(addANewMovie);
 router
   .route("/:id")
   .get(getSingleMovie)

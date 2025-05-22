@@ -35,16 +35,6 @@ app.use(cors()); // study it well
 app.use(checkToken);
 app.use(express.json());
 
-const customMiddleware1 = (req, res, next) => {
-  console.log("Midleware is Called 1");
-  next();
-};
-
-const customMiddleware2 = (req, res, next) => {
-  console.log("Midleware is Called 2");
-  next();
-};
-
 app.post("/api/formData", upload.any(), (req, res) => {
   let obj;
 
@@ -104,8 +94,6 @@ app.get("/api/unstable-endpoint", (req, res) => {
 })
 
 app.use(express.static("./public"));
-app.use(customMiddleware1);
-app.use(customMiddleware2);
 app.use("/api/v1/movies", router);
 
 module.exports = app;

@@ -1,5 +1,5 @@
 const fs = require("fs");
-const Movies = require("../Modals/movieModal");
+const Movie = require("../Modals/movieModal");
 
 // const file = JSON.parse(fs.readFileSync("./movies.json"));
 
@@ -46,21 +46,21 @@ const Movies = require("../Modals/movieModal");
 //   next();
 // };
 
-exports.bodyValidater = (req, res, next) => {
-  if (!req?.body?.name || !req?.body?.release) {
-    return res.status(400).json({
-      status : "failed",
-      message: "Not a valid movie data"
-    })
-  }
+// exports.bodyValidater = (req, res, next) => {
+//   if (!req?.body?.name || !req?.body?.duration) {
+//     return res.status(400).json({
+//       status: "failed",
+//       message: "Not a valid movie data"
+//     })
+//   }
 
-  next();
-}
+//   next();
+// }
 
 // Route Handlers 
 
-exports.getAllMovies = (req, res) => {
-// When worked with text JSON file
+exports.getAllMovies = async (req, res) => {
+  // When worked with text JSON file
 
   // res.status(200).json({
   //   status: "success",
@@ -71,12 +71,30 @@ exports.getAllMovies = (req, res) => {
   //   },
   // });
 
-// Wroking with database
+  // Wroking with database
 
+  try {
+    const docs = await Movie.find();
+    res.status(200).json({
+      status: "success",
+      length: docs.length,
+      data: {
+        movies: docs,
+      }
+    })
+
+  } catch(err) {
+    res.status(404).json({
+      status: "failed",
+      message: err.message,
+    })
+  }
 };
 
+
+
 exports.getSingleMovie = (req, res) => {
-// When worked with text JSON file
+  // When worked with text JSON file
 
   // const askedId = req.params.id;
   // const obj = file.find((item) => item.id === +askedId);
@@ -89,13 +107,13 @@ exports.getSingleMovie = (req, res) => {
   //   },
   // });
 
-// Wroking with database
+  // Wroking with database
 
 };
 
-exports.addANewMovie = (req, res) => {
-// When worked with text JSON file
-  
+exports.addANewMovie = async (req, res) => {
+  // When worked with text JSON file
+
   // const id = file[file.length - 1].id + 1;
   // const obj = Object.assign({ id }, req.body);
   // file.push(obj);
@@ -112,12 +130,29 @@ exports.addANewMovie = (req, res) => {
   //   });
   // });
 
-// Wroking with database
+  // Wroking with database
+
+  try {                          
+    const doc = await Movie.create(req.body);        
+    res.status(201).json({
+      status: "success",
+      data: {
+        movie: doc,
+      }
+    })
+  } catch (err) {
+    // thing in what cases the request can be rejected
+
+    res.status(400).json({
+      status: "failed ji",
+      message: err.message
+    })
+  }
 
 };
 
 exports.updateAMovieByPut = (req, res) => {
-// When worked with text JSON file
+  // When worked with text JSON file
 
   // const id = +req.params.id;
 
@@ -143,12 +178,12 @@ exports.updateAMovieByPut = (req, res) => {
   //   }
   // });
 
-// Wroking with database
+  // Wroking with database
 
 };
 
 exports.updateAmovieByPatch = (req, res) => {
-// When worked with text JSON file
+  // When worked with text JSON file
 
   // const id = +req.params.id;
 
@@ -180,17 +215,17 @@ exports.updateAmovieByPatch = (req, res) => {
   //   }
   // });
 
-// Wroking with database
+  // Wroking with database
 
 };
 
 exports.deleteAMovie = (req, res) => {
-// When worked with text JSON file
+  // When worked with text JSON file
 
   // const id = +req.params.id;
   // const obj = file.find((item) => item.id === id);
   // const index = file.indexOf(obj);
-  
+
   // file.splice(index, 1);
 
   // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
@@ -208,6 +243,6 @@ exports.deleteAMovie = (req, res) => {
   //   });
   // });
 
-// Wroking with database
+  // Wroking with database
 
 };
