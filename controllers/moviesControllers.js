@@ -60,7 +60,7 @@ const Movie = require("../Modals/movieModal");
 // Route Handlers 
 
 exports.getAllMovies = async (req, res) => {
-  // When worked with text JSON file
+// When worked with text JSON file
 
   // res.status(200).json({
   //   status: "success",
@@ -71,7 +71,7 @@ exports.getAllMovies = async (req, res) => {
   //   },
   // });
 
-  // Wroking with database
+// Wroking with database
 
   try {
     const docs = await Movie.find();
@@ -93,8 +93,8 @@ exports.getAllMovies = async (req, res) => {
 
 
 
-exports.getSingleMovie = (req, res) => {
-  // When worked with text JSON file
+exports.getSingleMovie = async (req, res) => {
+// When worked with text JSON file
 
   // const askedId = req.params.id;
   // const obj = file.find((item) => item.id === +askedId);
@@ -107,8 +107,20 @@ exports.getSingleMovie = (req, res) => {
   //   },
   // });
 
-  // Wroking with database
+// Wroking with database
 
+  try {
+    const movie = await Movie.findById(req.params.id)
+    res.status(200).json({
+      status: "success",
+      data: { movie }
+    })
+  } catch(err) {
+    res.status(404).json({
+      status: "failed",
+      message: err.message,
+    })
+  }
 };
 
 exports.addANewMovie = async (req, res) => {
@@ -130,7 +142,7 @@ exports.addANewMovie = async (req, res) => {
   //   });
   // });
 
-  // Wroking with database
+// Wroking with database
 
   try {                          
     const doc = await Movie.create(req.body);        
@@ -151,7 +163,7 @@ exports.addANewMovie = async (req, res) => {
 
 };
 
-exports.updateAMovieByPut = (req, res) => {
+exports.updateAMovieByPut = async (req, res) => {
   // When worked with text JSON file
 
   // const id = +req.params.id;
@@ -180,9 +192,33 @@ exports.updateAMovieByPut = (req, res) => {
 
   // Wroking with database
 
-};
+  const { name, description, duration, rating} = req.body;
 
-exports.updateAmovieByPatch = (req, res) => {
+  if (!name || !description || !duration || !rating) {
+    res.status(400).json({
+      status: "failed",
+      message: "Invalid movie data"
+    })
+  }
+
+  try {
+      const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
+      res.status(200).json({
+        status: "success",
+        data: {
+          movie
+        }
+      })
+    } catch(err) {
+      res.status(404).json({
+        status: "failed",
+        message: err.message,
+      })
+    }
+    
+}
+
+exports.updateAmovieByPatch = async (req, res) => {
   // When worked with text JSON file
 
   // const id = +req.params.id;
@@ -215,11 +251,25 @@ exports.updateAmovieByPatch = (req, res) => {
   //   }
   // });
 
-  // Wroking with database
+// Wroking with database
 
+  try {
+      const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
+      res.status(200).json({
+        status: "success",
+        data: {
+          movie
+        }
+      })
+    } catch(err) {
+      res.status(404).json({
+        status: "failed",
+        message: err.message,
+      })
+    }
 };
 
-exports.deleteAMovie = (req, res) => {
+exports.deleteAMovie = async (req, res) => {
   // When worked with text JSON file
 
   // const id = +req.params.id;
@@ -245,4 +295,16 @@ exports.deleteAMovie = (req, res) => {
 
   // Wroking with database
 
+  try {
+    await Movie.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: "success",
+      message: null
+    })
+  } catch(err) {
+    res.status(404).json({
+      status: "failed",
+      message: err.message,
+    })
+  }
 };
