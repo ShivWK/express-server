@@ -13,7 +13,7 @@ exports.checkToken = (req, res, next) => {
     })
   }
 
-  const token = authToken.splite(" ")[1];
+  const token = authToken.split(" ")[1];
 
   if (token !== "abc123") {
     return res.status(403).json({ status: "failed", message: "Forbidden: Invalid token"})
@@ -101,8 +101,8 @@ exports.updateAMovieByPut = (req, res) => {
   const obj = file.find((item) => item.id === id);
 
   const index = file.indexOf(obj);
-  const objToUpate = { id: obj.id, ...req.body };
-  file[index] = objToUpate;
+  const objToUpdate = { id: obj.id, ...req.body };
+  file[index] = objToUpdate;
 
   fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
     if (err) {
@@ -114,7 +114,7 @@ exports.updateAMovieByPut = (req, res) => {
       res.status(200).json({
         status: "success",
         data: {
-          movie: objToUpate,
+          movie: objToUpdate,
         },
       });
     }
@@ -133,8 +133,8 @@ exports.updateAmovieByPatch = (req, res) => {
     });
   }
   const index = file.indexOf(obj);
-  const objToUpate = { ...obj, ...req.body };
-  file[index] = objToUpate;
+  const objToUpdate = { ...obj, ...req.body };
+  file[index] = objToUpdate;
 
   fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
     if (err) {
@@ -146,7 +146,7 @@ exports.updateAmovieByPatch = (req, res) => {
       res.status(200).json({
         status: "success",
         data: {
-          movie: objToUpate,
+          movie: objToUpdate,
         },
       });
     }

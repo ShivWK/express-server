@@ -9,7 +9,7 @@ mongoose.connect(process.env.REMOTE_CONN_STR, {
   console.log("Connection Successful");
   // console.log(conn);
 }).catch(err => {
-  console.log("Error occured while connecting");
+  console.log("Error occurred while connecting");
   console.log(err);
 })
 
