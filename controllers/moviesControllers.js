@@ -1,5 +1,6 @@
 const fs = require("fs");
 const Movie = require("../Modals/movieModal");
+const qs = require('qs');
 
 // const file = JSON.parse(fs.readFileSync("./movies.json"));
 
@@ -74,7 +75,23 @@ exports.getAllMovies = async (req, res) => {
 // Wroking with database
 
   try {
-    const docs = await Movie.find();
+    // const docs = await Movie.find({duration: +req.query.duration, rating: +req.query.rating});
+    // const docs = await Movie.find(req.query);
+    // const docs = await Movie.find()
+    //         .where("duration")
+    //         .equals(req.query.duration)
+    //         .where("rating")
+    //         .equals(req.query.rating);
+
+    const searchParams = qs.parse(req.query);
+    const searchStr = JSON.stringify(searchParams);
+    const newSearchParams = JSON.parse(searchStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
+
+    console.log(newSearchParams);
+    // const docs = await Movie.find({duration: {$gte: req.query.duration}, rating: {$lte: req.query.rating}})
+
+    const docs = await Movie.find(newSearchParams);
+
     res.status(200).json({
       status: "success",
       length: docs.length,
