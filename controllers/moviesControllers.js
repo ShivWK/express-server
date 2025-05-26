@@ -6,6 +6,15 @@ const qs = require('qs');
 
 // Middlewares
 
+exports.queryProvider = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-rating";
+
+  console.log("called")
+
+  next();
+}
+
 // exports.checkToken = (req, res, next) => {
 //   console.log(req, res);
 
@@ -87,10 +96,53 @@ exports.getAllMovies = async (req, res) => {
     const searchStr = JSON.stringify(searchParams);
     const newSearchParams = JSON.parse(searchStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
 
-    console.log(newSearchParams);
     // const docs = await Movie.find({duration: {$gte: req.query.duration}, rating: {$lte: req.query.rating}})
+    // const docs = await Movie.find(newSearchParams);
 
-    const docs = await Movie.find(newSearchParams);
+    console.log(newSearchParams);
+
+    const sort = newSearchParams?.sort;
+    delete newSearchParams.sort;
+
+    const fields = newSearchParams?.fields;
+    delete newSearchParams.fields;
+
+    const page = +newSearchParams?.page || 1;
+    delete newSearchParams.page;
+
+    const limit = +newSearchParams.limit || 3;
+    delete newSearchParams.limit;
+
+    let query = Movie.find(newSearchParams);
+
+    if (req.query?.sort) {
+      const sortBy = sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt")
+    }
+
+    if (req.query?.fields) {
+      const requiredFields = fields.split(",").join(" ");
+      query = query.select(requiredFields);
+    } else {
+      query = query.select("-__v")
+    }
+
+    //Pagination
+
+    const skip = (page - 1) * limit;
+    query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const moviesCount = await Movie.countDocuments();  
+      if (skip >= moviesCount) {
+        throw new Error("This page is not found");
+      }  
+    }
+
+    const docs = await query;
+    // console.log(docs)
 
     res.status(200).json({
       status: "success",
@@ -107,7 +159,6 @@ exports.getAllMovies = async (req, res) => {
     })
   }
 };
-
 
 
 exports.getSingleMovie = async (req, res) => {

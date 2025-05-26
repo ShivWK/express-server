@@ -10,6 +10,7 @@ const {
   updateAmovieByPatch,
   deleteAMovie,
   bodyValidater,
+  queryProvider
 } = require("../controllers/moviesControllers");
 
 // router.param("id", checkId);
@@ -20,6 +21,7 @@ router.use((req, res, next) => {
 });
 // router.use(morgan("dev"));
 
+router.route("/topRatedMovies").get(queryProvider, getAllMovies)
 router.route("/").get(getAllMovies).post(addANewMovie);
 router
   .route("/:id")
