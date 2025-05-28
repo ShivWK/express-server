@@ -34,6 +34,7 @@ const upload = multer();
 app.use(cors()); // study it well
 app.use(checkToken);
 app.use(express.json());
+// app.use(express.urlencoded({extended: true}))
 
 app.post("/api/formData", upload.any(), (req, res) => {
   let obj;
