@@ -6,11 +6,10 @@ class ApiFeatures {
         this.query = query;
         this.queryStr = queryStr;
         this.availableFields = ["name", "description", "rating", "duration", "totalRating", "createdAt", "releaseYear", "releaseDate"]
-    }
+    }                                                
 
     filter() {
         const searchParams = qs.parse(this.queryStr);
-        const excludeFields = ["sort", "fields", "page", "limit"];
 
         for (let key in searchParams) {
             if (!this.availableFields.includes(key)) {
@@ -42,7 +41,7 @@ class ApiFeatures {
 
             const sortBy = sortFields.join(" ");
 
-            this.query = this.query.sort(`${sortBy}`);
+            this.query = this.query.sort(sortBy);
         } else {
             this.query = this.query.sort("rating")
         }
@@ -66,7 +65,7 @@ class ApiFeatures {
 
             const requiredFields = limitFields.join(" ");
 
-            this.query = this.query.select(`${requiredFields}`);
+            this.query = this.query.select(requiredFields);
         } else {
             this.query = this.query.select("-__v")
         }
@@ -74,19 +73,19 @@ class ApiFeatures {
         return this;
     }
 
-    paginate() {
+    async paginate() {
         const page = +this.queryStr.page || 1;
         const limit = +this.queryStr.limit || 3;
         const skip = (page - 1) * limit;
 
         this.query = this.query.skip(skip).limit(limit);
 
-        // if (this.queryStr.page) {
-        //     const moviesCount = await Movie.countDocuments();
-        //     if (skip >= moviesCount) {
-        //         throw new Error("This page is not found");
-        //     }
-        // }
+        if (this.queryStr.page) {
+            const moviesCount = await Movie.countDocuments();
+            if (skip >= moviesCount) {
+                throw new Error("This page is not found");
+            }
+        }
 
         return this;
     }
