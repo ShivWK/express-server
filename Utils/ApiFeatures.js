@@ -5,17 +5,18 @@ class ApiFeatures {
     constructor(query, queryStr) {
         this.query = query;
         this.queryStr = queryStr;
+        this.availableFields = ["name", "description", "rating", "duration", "totalRating", "createdAt", "releaseYear", "releaseDate"]
     }
 
     filter() {
         const searchParams = qs.parse(this.queryStr);
         const excludeFields = ["sort", "fields", "page", "limit"];
 
-        excludeFields.forEach(field => {
-            if (searchParams[field]) {
-                delete searchParams[field];
+        for (let key in searchParams) {
+            if (!this.availableFields.includes(key)) {
+                delete searchParams[key];
             }
-        })
+        }
 
         const searchStr = JSON.stringify(searchParams);
         const newSearchParams = JSON.parse(searchStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
@@ -27,13 +28,12 @@ class ApiFeatures {
 
     sort() {
         if (this.queryStr.sort) {
-            const availableFields = ["name", "description", "rating", "duration", "totalRating", "createdAt", "releaseYear", "releaseDate"]
             const sortFields = this.queryStr.sort.split(",");
             
             const isAllowed = sortFields.every(field => {
                 const cleanField = field.startsWith("-") ? field.substring(1) : field;
 
-                return availableFields.includes(cleanField);
+                return this.availableFields.includes(cleanField);
             })
 
             if (!isAllowed) {
@@ -52,13 +52,12 @@ class ApiFeatures {
 
     limitFields() {
         if (this.queryStr.fields) {
-            const availableFields = ["name", "description", "rating", "duration", "totalRating", "createdAt", "releaseYear", "releaseDate"]
             const limitFields = this.queryStr.fields.split(",");
 
             const isAllowed = limitFields.every(field => {
                 const cleanField = field.startsWith("-") ? field.substring(1) : field;
 
-                return availableFields.includes(cleanField);
+                return this.availableFields.includes(cleanField);
             })
 
             if (!isAllowed) {
