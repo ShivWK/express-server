@@ -145,7 +145,9 @@ exports.getAllMovies = async (req, res) => {
     // const docs = await query;
     // console.log(docs)
 
-    const feature = new ApiFeatures(Movie.find(), req.query).filter().sort().limitFields().paginate();
+    let feature = new ApiFeatures(Movie.find(), req.query).filter().sort().limitFields();
+    feature = await feature.paginate();
+
     const docs = await feature.query || [];
 
     res.status(200).json({
@@ -378,5 +380,40 @@ exports.deleteAMovie = async (req, res) => {
       status: "failed",
       message: err.message,
     })
-  }
+  }                                                                                                                                                                   
 };
+
+exports.getMovieStats = async (req, res) => {
+  try {
+    const stats = await Movie.aggregate([
+      {
+        $addFields: {
+          ratingNum: { $toDouble: "$rating" }
+        }
+      }, 
+      {$match: { ratingNum: { $gte: 1 } } },
+      {$group : {
+        _id: "$duration",
+        totalMovies: {$sum: 1},
+        maxRating: {$max: "$ratingNum"},
+        maxDuration: {$max: "$duration"},
+        averageRating: {$avg: "$ratingNum"},
+        minimumDuration: {$min: "$duration"},
+      }},
+      {$sort : { "maxRating": 1}}
+    ]);
+
+    res.status(200).json({
+      status: "success1",
+      count: stats.length,
+      data: {
+        stats
+      },
+    })
+  } catch (err) {
+    res.status(404).json({
+      status: "failed",
+      message: err.message
+    })
+  }
+}

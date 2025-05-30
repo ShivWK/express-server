@@ -17,7 +17,7 @@ const movieSchema = new mongoose.Schema({
     required: [true, "Duration is required field!"]
   },
   rating: {
-    type: String,
+    type: Number,
     default: 1.0,
   },
   totalRating: {
