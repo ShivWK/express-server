@@ -11,7 +11,8 @@ const {
   deleteAMovie,
   bodyValidater,
   queryProvider,
-  getMovieStats
+  getMovieStats,
+  getMovieByGenre
 } = require("../controllers/moviesControllers");
 
 // router.param("id", checkId);
@@ -25,6 +26,7 @@ router.use((req, res, next) => {
 router.route("/topRatedMovies").get(queryProvider, getAllMovies)
 router.route("/").get(getAllMovies).post(addANewMovie);
 router.route("/movies-stats").get(getMovieStats);
+router.route("/getByGenre/:genre").get(getMovieByGenre);
 
 router
   .route("/:id")

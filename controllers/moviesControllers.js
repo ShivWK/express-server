@@ -380,7 +380,7 @@ exports.deleteAMovie = async (req, res) => {
       status: "failed",
       message: err.message,
     })
-  }                                                                                                                                                                   
+  }
 };
 
 exports.getMovieStats = async (req, res) => {
@@ -390,17 +390,19 @@ exports.getMovieStats = async (req, res) => {
         $addFields: {
           ratingNum: { $toDouble: "$rating" }
         }
-      }, 
-      {$match: { ratingNum: { $gte: 1 } } },
-      {$group : {
-        _id: "$duration",
-        totalMovies: {$sum: 1},
-        maxRating: {$max: "$ratingNum"},
-        maxDuration: {$max: "$duration"},
-        averageRating: {$avg: "$ratingNum"},
-        minimumDuration: {$min: "$duration"},
-      }},
-      {$sort : { "maxRating": 1}}
+      },
+      { $match: { ratingNum: { $gte: 1 } } },
+      {
+        $group: {
+          _id: "$duration",
+          totalMovies: { $sum: 1 },
+          maxRating: { $max: "$ratingNum" },
+          maxDuration: { $max: "$duration" },
+          averageRating: { $avg: "$ratingNum" },
+          minimumDuration: { $min: "$duration" },
+        }
+      },
+      { $sort: { "maxRating": 1 } }
     ]);
 
     res.status(200).json({
@@ -417,3 +419,42 @@ exports.getMovieStats = async (req, res) => {
     })
   }
 }
+
+exports.getMovieByGenre = async (req, res) => {
+  try {
+    const genre = req.params.genre;
+    const result = await Movie.aggregate([
+      {
+        $unwind: {
+          path: "$genres",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: "$genres",
+          movieCount: { $sum: 1 },
+          movies: { $push: "$name" },
+        }
+      },
+      { $addFields: { Genre: "$_id" } },
+      { $project: { Total: "$movieCount", Genre: 1, movies: 1, _id: 0, }},
+      { $sort: { "Total": 1 } },
+      { $match: { Genre : genre}}
+    ])
+
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      data: {
+        result
+      },
+    })
+  } catch (err) {
+    res.status(404).json({
+      status: "failed",
+      message: err.message
+    })
+  }
+}
+

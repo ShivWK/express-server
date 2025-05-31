@@ -34,7 +34,8 @@ const movieSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
     select: false
-  }
+  },
+  genres : [String]
 });
 
 const Movie = mongoose.model("Movie", movieSchema);
