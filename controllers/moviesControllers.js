@@ -435,10 +435,11 @@ exports.getMovieByGenre = async (req, res) => {
           _id: "$genres",
           movieCount: { $sum: 1 },
           movies: { $push: "$name" },
+          releaseYear: {$push: "$releaseYear"}
         }
       },
       { $addFields: { Genre: "$_id" } },
-      { $project: { Total: "$movieCount", Genre: 1, movies: 1, _id: 0, }},
+      { $project: { Total: "$movieCount", Genre: 1, movies: 1, _id: 0, releaseYear: 1 }},
       { $sort: { "Total": 1 } },
       { $match: { Genre : genre}}
     ])
