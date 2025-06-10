@@ -2,11 +2,14 @@ const fs = require("fs");
 const Movie = require("../Modals/movieModal");
 const qs = require('qs');
 const ApiFeatures = require("./../Utils/ApiFeatures");
+const asyncWrapperFunction = require("./../Utils/asyncErrorHandler");
+const CustomError = require("./../Utils/CustomError");
 
 // const file = JSON.parse(fs.readFileSync("./movies.json"));
 
 // Middlewares
 
+// Conficted query not attached to the request object
 exports.queryProvider = (req, res, next) => {
   console.log("B", req.query);
   req.query.limit = "5";
@@ -70,20 +73,20 @@ exports.queryProvider = (req, res, next) => {
 
 // Route Handlers 
 
-exports.getAllMovies = async (req, res) => {
+exports.getAllMovies = asyncWrapperFunction(async (req, res) => {
   // When worked with text JSON file
 
-  // res.status(200).json({
-  //   status: "success",
-  //   count: file.length,
-  //   requestedAt: req.requestedAt,
-  //   data: {
-  //     movies: file,
-  //   },
-  // });
+    // res.status(200).json({
+    //   status: "success",
+    //   count: file.length,
+    //   requestedAt: req.requestedAt,
+    //   data: {
+    //     movies: file,
+    //   },
+    // });
 
   // Wroking with database
-  try {
+  
     // const docs = await Movie.find({duration: +req.query.duration, rating: +req.query.rating});
     // const docs = await Movie.find(req.query);
     // const docs = await Movie.find()
@@ -157,68 +160,58 @@ exports.getAllMovies = async (req, res) => {
         movies: docs,
       }
     })
-
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
-};
+});
 
 
-exports.getSingleMovie = async (req, res) => {
+exports.getSingleMovie = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-  // const askedId = req.params.id;
-  // const obj = file.find((item) => item.id === +askedId);
+    // const askedId = req.params.id;
+    // const obj = file.find((item) => item.id === +askedId);
 
-  // res.status(200).json({
-  //   status: "success",
-  //   requestedAt: req.requestedAt,
-  //   data: {
-  //     movie: obj,
-  //   },
-  // });
+    // res.status(200).json({
+    //   status: "success",
+    //   requestedAt: req.requestedAt,
+    //   data: {
+    //     movie: obj,
+    //   },
+    // });
 
   // Wroking with database
 
-  try {
-    const movie = await Movie.findById(req.params.id)
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) {
+      const err = new CustomError("Requested movie is not found", 404);
+      return next(err);
+    }
+
     res.status(200).json({
       status: "success",
       data: { movie }
     })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
-};
+});
 
-exports.addANewMovie = async (req, res) => {
+exports.addANewMovie = asyncWrapperFunction(async (req, res) => {
   // When worked with text JSON file
 
-  // const id = file[file.length - 1].id + 1;
-  // const obj = Object.assign({ id }, req.body);
-  // file.push(obj);
+    // const id = file[file.length - 1].id + 1;
+    // const obj = Object.assign({ id }, req.body);
+    // file.push(obj);
 
-  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  //   res.status(201).json({
-  //     status: "success",
-  //     data: {
-  //       movies: obj,
-  //     },
-  //   });
-  // });
+    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+    //   if (err) {
+    //     console.log(err);
+    //   }
+    //   res.status(201).json({
+    //     status: "success",
+    //     data: {
+    //       movies: obj,
+    //     },
+    //   });
+    // });
 
   // Wroking with database
 
-  try {
     const doc = await Movie.create(req.body);
     res.status(201).json({
       status: "success",
@@ -226,165 +219,151 @@ exports.addANewMovie = async (req, res) => {
         movie: doc,
       }
     })
-  } catch (err) {
-    // thing in what cases the request can be rejected
+});
 
-    res.status(400).json({
-      status: "failed ji",
-      message: err.message
-    })
-  }
-
-};
-
-exports.updateAMovieByPut = async (req, res) => {
+exports.updateAMovieByPut = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-  // const id = +req.params.id;
+    // const id = +req.params.id;
 
-  // const obj = file.find((item) => item.id === id);
+    // const obj = file.find((item) => item.id === id);
 
-  // const index = file.indexOf(obj);
-  // const objToUpdate = { id: obj.id, ...req.body };
-  // file[index] = objToUpdate;
+    // const index = file.indexOf(obj);
+    // const objToUpdate = { id: obj.id, ...req.body };
+    // file[index] = objToUpdate;
 
-  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-  //   if (err) {
-  //     res.status(500).json({
-  //       status: "success",
-  //       message: "Failed to write file",
-  //     });
-  //   } else {
-  //     res.status(200).json({
-  //       status: "success",
-  //       data: {
-  //         movie: objToUpdate,
-  //       },
-  //     });
-  //   }
-  // });
+    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+    //   if (err) {
+    //     res.status(500).json({
+    //       status: "success",
+    //       message: "Failed to write file",
+    //     });
+    //   } else {
+    //     res.status(200).json({
+    //       status: "success",
+    //       data: {
+    //         movie: objToUpdate,
+    //       },
+    //     });
+    //   }
+    // });
 
   // Wroking with database
 
-  const { name, description, duration, rating } = req.body;
+    const { name, description, duration, rating } = req.body;
 
-  if (!name || !description || !duration || !rating) {
-    res.status(400).json({
-      status: "failed",
-      message: "Invalid movie data"
-    })
-  }
+    if (!name || !description || !duration || !rating) {
+      res.status(400).json({
+        status: "failed",
+        message: "Invalid movie data"
+      })
+    }
 
-  try {
     const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+
+    if (!movie) {
+      const err = new CustomError("Requested movie is not found", 404);
+      return next(err);
+    }
+
     res.status(200).json({
       status: "success",
       data: {
         movie
       }
     })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
+});
 
-}
-
-exports.updateAmovieByPatch = async (req, res) => {
+exports.updateAmovieByPatch = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-  // const id = +req.params.id;
+    // const id = +req.params.id;
 
-  // const obj = file.find((item) => item.id === id);
+    // const obj = file.find((item) => item.id === id);
 
-  // if (!obj) {
-  //   return res.status(404).json({
-  //     status: "failed",
-  //     message: "Not found",
-  //   });
-  // }
-  // const index = file.indexOf(obj);
-  // const objToUpdate = { ...obj, ...req.body };
-  // file[index] = objToUpdate;
+    // if (!obj) {
+    //   return res.status(404).json({
+    //     status: "failed",
+    //     message: "Not found",
+    //   });
+    // }
+    // const index = file.indexOf(obj);
+    // const objToUpdate = { ...obj, ...req.body };
+    // file[index] = objToUpdate;
 
-  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-  //   if (err) {
-  //     res.status(500).json({
-  //       status: "success",
-  //       message: "Failed to write file",
-  //     });
-  //   } else {
-  //     res.status(200).json({
-  //       status: "success",
-  //       data: {
-  //         movie: objToUpdate,
-  //       },
-  //     });
-  //   }
-  // });
+    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+    //   if (err) {
+    //     res.status(500).json({
+    //       status: "success",
+    //       message: "Failed to write file",
+    //     });
+    //   } else {
+    //     res.status(200).json({
+    //       status: "success",
+    //       data: {
+    //         movie: objToUpdate,
+    //       },
+    //     });
+    //   }
+    // });
 
   // Wroking with database
 
-  try {
     const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+
+    if (!movie) {
+      const err = new CustomError("Requested movie is not found", 404);
+      return next(err);
+    }
+
     res.status(200).json({
       status: "success",
       data: {
         movie
       }
     })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
-};
+});
 
-exports.deleteAMovie = async (req, res) => {
+exports.deleteAMovie = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-  // const id = +req.params.id;
-  // const obj = file.find((item) => item.id === id);
-  // const index = file.indexOf(obj);
+    // const id = +req.params.id;
+    // const obj = file.find((item) => item.id === id);
+    // const index = file.indexOf(obj);
 
-  // file.splice(index, 1);
+    // file.splice(index, 1);
 
-  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-  //   if (err) {
-  //     return res.status(500).json({
-  //       status: "failed",
-  //       message: "Failed to write file",
-  //     });
-  //   }
-  //   res.status(204).json({
-  //     status: "success",
-  //     data: {
-  //       movies: null,
-  //     },
-  //   });
-  // });
+    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+    //   if (err) {
+    //     return res.status(500).json({
+    //       status: "failed",
+    //       message: "Failed to write file",
+    //     });
+    //   }
+    //   res.status(204).json({
+    //     status: "success",
+    //     data: {
+    //       movies: null,
+    //     },
+    //   });
+    // });
 
   // Wroking with database
 
-  try {
-    await Movie.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: "success",
-      message: null
-    })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
-};
+    const movie = await Movie.findByIdAndDelete(req.params.id);
 
-exports.getMovieStats = async (req, res) => {
-  try {
+    if (!movie) {
+      const err = new CustomError("Requested movie is not found", 404);
+      return next(err);
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: movie,
+    })
+});
+
+exports.getMovieStats = asyncWrapperFunction(async (req, res) => {
     const stats = await Movie.aggregate([
       {
         $addFields: {
@@ -412,16 +391,9 @@ exports.getMovieStats = async (req, res) => {
         stats
       },
     })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message
-    })
-  }
-}
+});
 
-exports.getMovieByGenre = async (req, res) => {
-  try {
+exports.getMovieByGenre = asyncWrapperFunction(async (req, res) => {
     const genre = req.params.genre;
     const result = await Movie.aggregate([
       {
@@ -451,11 +423,5 @@ exports.getMovieByGenre = async (req, res) => {
         result
       },
     })
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message
-    })
-  }
-}
+});
 

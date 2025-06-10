@@ -6,3 +6,17 @@ Query took 62 milliseconds
 Query took 92 milliseconds 
 Query took 66 milliseconds 
 Query took 98 milliseconds 
+Query took 110 milliseconds 
+Query took 87 milliseconds 
+Query took 84 milliseconds 
+new movie added BHARAT ne mar p@kistan 4 
+Query took 87 milliseconds 
+Query took 79 milliseconds 
+Query took 103 milliseconds 
+Query took 146 milliseconds 
+Query took 66 milliseconds 
+Query took 85 milliseconds 
+Query took 584 milliseconds 
+Query took 184 milliseconds 
+Query took 92 milliseconds 
+Query took 70 milliseconds 
