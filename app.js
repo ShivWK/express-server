@@ -6,6 +6,7 @@ const cors = require("cors");
 const multer = require("multer");
 const CustomError = require("./Utils/CustomError");
 const globalErrorHandler = require("./controllers/errorControllers");
+const authRouter = require('./Routes/userRoutes');
 // const checkToken= require("./controllers/moviesControllers")
 
 let file = JSON.parse(fs.readFileSync("./form.json"));
@@ -98,6 +99,7 @@ app.get("/api/unstable-endpoint", (req, res) => {
 
 app.use(express.static("./public"));
 app.use("/api/v1/movies", router);
+app.use("/api/v1/users", authRouter);
 
 app.all(/(.*)/, (req, res, next) => {                                                                               
 

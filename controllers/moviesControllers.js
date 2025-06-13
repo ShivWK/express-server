@@ -178,6 +178,7 @@ exports.getSingleMovie = asyncWrapperFunction(async (req, res, next) => {
     // });
 
   // Wroking with database
+    console.log(a);
 
     const movie = await Movie.findById(req.params.id);
     if (!movie) {

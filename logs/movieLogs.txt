@@ -20,3 +20,6 @@ Query took 584 milliseconds
 Query took 184 milliseconds 
 Query took 92 milliseconds 
 Query took 70 milliseconds 
+new movie added BHARAT ne mar p@kistan 5 
+new movie added BHAraat 
+Query took 338 milliseconds 
