@@ -12,7 +12,8 @@ const {
   bodyValidater,
   queryProvider,
   getMovieStats,
-  getMovieByGenre
+  getMovieByGenre,
+  protect
 } = require("../controllers/moviesControllers");
 
 // router.param("id", checkId);
@@ -24,7 +25,7 @@ router.use((req, res, next) => {
 // router.use(morgan("dev"));
 
 router.route("/topRatedMovies").get(queryProvider, getAllMovies)
-router.route("/").get(getAllMovies).post(addANewMovie);
+router.route("/").get(protect, getAllMovies).post(addANewMovie);
 router.route("/movies-stats").get(getMovieStats);
 router.route("/getByGenre/:genre").get(getMovieByGenre);
 

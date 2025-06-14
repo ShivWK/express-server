@@ -4,6 +4,8 @@ const qs = require('qs');
 const ApiFeatures = require("./../Utils/ApiFeatures");
 const asyncWrapperFunction = require("./../Utils/asyncErrorHandler");
 const CustomError = require("./../Utils/CustomError");
+const jwt = require("jsonwebtoken");
+const util = require("util");
 
 // const file = JSON.parse(fs.readFileSync("./movies.json"));
 
@@ -76,353 +78,399 @@ exports.queryProvider = (req, res, next) => {
 exports.getAllMovies = asyncWrapperFunction(async (req, res) => {
   // When worked with text JSON file
 
-    // res.status(200).json({
-    //   status: "success",
-    //   count: file.length,
-    //   requestedAt: req.requestedAt,
-    //   data: {
-    //     movies: file,
-    //   },
-    // });
+  // res.status(200).json({
+  //   status: "success",
+  //   count: file.length,
+  //   requestedAt: req.requestedAt,
+  //   data: {
+  //     movies: file,
+  //   },
+  // });
 
   // Wroking with database
-  
-    // const docs = await Movie.find({duration: +req.query.duration, rating: +req.query.rating});
-    // const docs = await Movie.find(req.query);
-    // const docs = await Movie.find()
-    //         .where("duration")
-    //         .equals(req.query.duration)
-    //         .where("rating")
-    //         .equals(req.query.rating);
 
-    // const searchParams = qs.parse(req.query);
-    // const searchStr = JSON.stringify(searchParams);
-    // const newSearchParams = JSON.parse(searchStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
+  // const docs = await Movie.find({duration: +req.query.duration, rating: +req.query.rating});
+  // const docs = await Movie.find(req.query);
+  // const docs = await Movie.find()
+  //         .where("duration")
+  //         .equals(req.query.duration)
+  //         .where("rating")
+  //         .equals(req.query.rating);
 
-    // const docs = await Movie.find({duration: {$gte: req.query.duration}, rating: {$lte: req.query.rating}})
-    // const docs = await Movie.find(newSearchParams);
+  // const searchParams = qs.parse(req.query);
+  // const searchStr = JSON.stringify(searchParams);
+  // const newSearchParams = JSON.parse(searchStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
 
-    // let newSearchParams = req.query;
-    // console.log(newSearchParams);
+  // const docs = await Movie.find({duration: {$gte: req.query.duration}, rating: {$lte: req.query.rating}})
+  // const docs = await Movie.find(newSearchParams);
 
-    // const sort = newSearchParams?.sort;
-    // delete newSearchParams.sort;
+  // let newSearchParams = req.query;
+  // console.log(newSearchParams);
 
-    // const fields = newSearchParams?.fields;
-    // delete newSearchParams.fields;
+  // const sort = newSearchParams?.sort;
+  // delete newSearchParams.sort;
 
-    // const page = +newSearchParams?.page || 1;
-    // delete newSearchParams.page;
+  // const fields = newSearchParams?.fields;
+  // delete newSearchParams.fields;
 
-    // const limit = +newSearchParams.limit || 3;
-    // delete newSearchParams.limit;
+  // const page = +newSearchParams?.page || 1;
+  // delete newSearchParams.page;
 
-    // let query = Movie.find(newSearchParams);
+  // const limit = +newSearchParams.limit || 3;
+  // delete newSearchParams.limit;
 
-    // if (req.query?.sort) {
-    //   const sortBy = sort.split(",").join(" ");
-    //   query = query.sort(sortBy);
-    // } else {
-    //   query = query.sort("-createdAt")
-    // }
+  // let query = Movie.find(newSearchParams);
 
-    // if (req.query?.fields) {
-    //   const requiredFields = fields.split(",").join(" ");
-    //   query = query.select(requiredFields);
-    // } else {
-    //   query = query.select("-__v")
-    // }
+  // if (req.query?.sort) {
+  //   const sortBy = sort.split(",").join(" ");
+  //   query = query.sort(sortBy);
+  // } else {
+  //   query = query.sort("-createdAt")
+  // }
 
-    // //Pagination
+  // if (req.query?.fields) {
+  //   const requiredFields = fields.split(",").join(" ");
+  //   query = query.select(requiredFields);
+  // } else {
+  //   query = query.select("-__v")
+  // }
 
-    // const skip = (page - 1) * limit;
-    // query.skip(skip).limit(limit);
+  // //Pagination
 
-    // if (req.query.page) {
-    //   const moviesCount = await Movie.countDocuments();  
-    //   if (skip >= moviesCount) {
-    //     throw new Error("This page is not found");
-    //   }  
-    // }
+  // const skip = (page - 1) * limit;
+  // query.skip(skip).limit(limit);
 
-    // const docs = await query;
-    // console.log(docs)
+  // if (req.query.page) {
+  //   const moviesCount = await Movie.countDocuments();  
+  //   if (skip >= moviesCount) {
+  //     throw new Error("This page is not found");
+  //   }  
+  // }
 
-    let feature = new ApiFeatures(Movie.find(), req.query).filter().sort().limitFields();
-    feature = await feature.paginate();
+  // const docs = await query;
+  // console.log(docs)
 
-    const docs = await feature.query || [];
+  let feature = new ApiFeatures(Movie.find(), req.query).filter().sort().limitFields();
+  feature = await feature.paginate();
 
-    res.status(200).json({
-      status: "success",
-      length: docs.length,
-      data: {
-        movies: docs,
-      }
-    })
+  const docs = await feature.query || [];
+
+  res.status(200).json({
+    status: "success",
+    length: docs.length,
+    data: {
+      movies: docs,
+    }
+  })
 });
 
 
 exports.getSingleMovie = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-    // const askedId = req.params.id;
-    // const obj = file.find((item) => item.id === +askedId);
+  // const askedId = req.params.id;
+  // const obj = file.find((item) => item.id === +askedId);
 
-    // res.status(200).json({
-    //   status: "success",
-    //   requestedAt: req.requestedAt,
-    //   data: {
-    //     movie: obj,
-    //   },
-    // });
+  // res.status(200).json({
+  //   status: "success",
+  //   requestedAt: req.requestedAt,
+  //   data: {
+  //     movie: obj,
+  //   },
+  // });
 
   // Wroking with database
-    console.log(a);
+  console.log(a);
 
-    const movie = await Movie.findById(req.params.id);
-    if (!movie) {
-      const err = new CustomError("Requested movie is not found", 404);
-      return next(err);
-    }
+  const movie = await Movie.findById(req.params.id);
+  if (!movie) {
+    const err = new CustomError("Requested movie is not found", 404);
+    return next(err);
+  }
 
-    res.status(200).json({
-      status: "success",
-      data: { movie }
-    })
+  res.status(200).json({
+    status: "success",
+    data: { movie }
+  })
 });
 
 exports.addANewMovie = asyncWrapperFunction(async (req, res) => {
   // When worked with text JSON file
 
-    // const id = file[file.length - 1].id + 1;
-    // const obj = Object.assign({ id }, req.body);
-    // file.push(obj);
+  // const id = file[file.length - 1].id + 1;
+  // const obj = Object.assign({ id }, req.body);
+  // file.push(obj);
 
-    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    //   if (err) {
-    //     console.log(err);
-    //   }
-    //   res.status(201).json({
-    //     status: "success",
-    //     data: {
-    //       movies: obj,
-    //     },
-    //   });
-    // });
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //   }
+  //   res.status(201).json({
+  //     status: "success",
+  //     data: {
+  //       movies: obj,
+  //     },
+  //   });
+  // });
 
   // Wroking with database
 
-    const doc = await Movie.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: {
-        movie: doc,
-      }
-    })
+  const doc = await Movie.create(req.body);
+  res.status(201).json({
+    status: "success",
+    data: {
+      movie: doc,
+    }
+  })
 });
 
 exports.updateAMovieByPut = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-    // const id = +req.params.id;
+  // const id = +req.params.id;
 
-    // const obj = file.find((item) => item.id === id);
+  // const obj = file.find((item) => item.id === id);
 
-    // const index = file.indexOf(obj);
-    // const objToUpdate = { id: obj.id, ...req.body };
-    // file[index] = objToUpdate;
+  // const index = file.indexOf(obj);
+  // const objToUpdate = { id: obj.id, ...req.body };
+  // file[index] = objToUpdate;
 
-    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    //   if (err) {
-    //     res.status(500).json({
-    //       status: "success",
-    //       message: "Failed to write file",
-    //     });
-    //   } else {
-    //     res.status(200).json({
-    //       status: "success",
-    //       data: {
-    //         movie: objToUpdate,
-    //       },
-    //     });
-    //   }
-    // });
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     res.status(500).json({
+  //       status: "success",
+  //       message: "Failed to write file",
+  //     });
+  //   } else {
+  //     res.status(200).json({
+  //       status: "success",
+  //       data: {
+  //         movie: objToUpdate,
+  //       },
+  //     });
+  //   }
+  // });
 
   // Wroking with database
 
-    const { name, description, duration, rating } = req.body;
+  const { name, description, duration, rating } = req.body;
 
-    if (!name || !description || !duration || !rating) {
-      res.status(400).json({
-        status: "failed",
-        message: "Invalid movie data"
-      })
-    }
-
-    const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-
-    if (!movie) {
-      const err = new CustomError("Requested movie is not found", 404);
-      return next(err);
-    }
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        movie
-      }
+  if (!name || !description || !duration || !rating) {
+    res.status(400).json({
+      status: "failed",
+      message: "Invalid movie data"
     })
+  }
+
+  const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+
+  if (!movie) {
+    const err = new CustomError("Requested movie is not found", 404);
+    return next(err);
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      movie
+    }
+  })
 });
 
 exports.updateAmovieByPatch = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-    // const id = +req.params.id;
+  // const id = +req.params.id;
 
-    // const obj = file.find((item) => item.id === id);
+  // const obj = file.find((item) => item.id === id);
 
-    // if (!obj) {
-    //   return res.status(404).json({
-    //     status: "failed",
-    //     message: "Not found",
-    //   });
-    // }
-    // const index = file.indexOf(obj);
-    // const objToUpdate = { ...obj, ...req.body };
-    // file[index] = objToUpdate;
+  // if (!obj) {
+  //   return res.status(404).json({
+  //     status: "failed",
+  //     message: "Not found",
+  //   });
+  // }
+  // const index = file.indexOf(obj);
+  // const objToUpdate = { ...obj, ...req.body };
+  // file[index] = objToUpdate;
 
-    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    //   if (err) {
-    //     res.status(500).json({
-    //       status: "success",
-    //       message: "Failed to write file",
-    //     });
-    //   } else {
-    //     res.status(200).json({
-    //       status: "success",
-    //       data: {
-    //         movie: objToUpdate,
-    //       },
-    //     });
-    //   }
-    // });
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     res.status(500).json({
+  //       status: "success",
+  //       message: "Failed to write file",
+  //     });
+  //   } else {
+  //     res.status(200).json({
+  //       status: "success",
+  //       data: {
+  //         movie: objToUpdate,
+  //       },
+  //     });
+  //   }
+  // });
 
   // Wroking with database
 
-    const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
 
-    if (!movie) {
-      const err = new CustomError("Requested movie is not found", 404);
-      return next(err);
+  if (!movie) {
+    const err = new CustomError("Requested movie is not found", 404);
+    return next(err);
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      movie
     }
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        movie
-      }
-    })
+  })
 });
 
 exports.deleteAMovie = asyncWrapperFunction(async (req, res, next) => {
   // When worked with text JSON file
 
-    // const id = +req.params.id;
-    // const obj = file.find((item) => item.id === id);
-    // const index = file.indexOf(obj);
+  // const id = +req.params.id;
+  // const obj = file.find((item) => item.id === id);
+  // const index = file.indexOf(obj);
 
-    // file.splice(index, 1);
+  // file.splice(index, 1);
 
-    // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
-    //   if (err) {
-    //     return res.status(500).json({
-    //       status: "failed",
-    //       message: "Failed to write file",
-    //     });
-    //   }
-    //   res.status(204).json({
-    //     status: "success",
-    //     data: {
-    //       movies: null,
-    //     },
-    //   });
-    // });
+  // fs.writeFile("./movies.json", JSON.stringify(file), (err) => {
+  //   if (err) {
+  //     return res.status(500).json({
+  //       status: "failed",
+  //       message: "Failed to write file",
+  //     });
+  //   }
+  //   res.status(204).json({
+  //     status: "success",
+  //     data: {
+  //       movies: null,
+  //     },
+  //   });
+  // });
 
   // Wroking with database
 
-    const movie = await Movie.findByIdAndDelete(req.params.id);
+  const movie = await Movie.findByIdAndDelete(req.params.id);
 
-    if (!movie) {
-      const err = new CustomError("Requested movie is not found", 404);
-      return next(err);
-    }
+  if (!movie) {
+    const err = new CustomError("Requested movie is not found", 404);
+    return next(err);
+  }
 
-    res.status(200).json({
-      status: "success",
-      message: movie,
-    })
+  res.status(200).json({
+    status: "success",
+    message: movie,
+  })
 });
 
 exports.getMovieStats = asyncWrapperFunction(async (req, res) => {
-    const stats = await Movie.aggregate([
-      {
-        $addFields: {
-          ratingNum: { $toDouble: "$rating" }
-        }
-      },
-      { $match: { ratingNum: { $gte: 1 } } },
-      {
-        $group: {
-          _id: "$duration",
-          totalMovies: { $sum: 1 },
-          maxRating: { $max: "$ratingNum" },
-          maxDuration: { $max: "$duration" },
-          averageRating: { $avg: "$ratingNum" },
-          minimumDuration: { $min: "$duration" },
-        }
-      },
-      { $sort: { "maxRating": 1 } }
-    ]);
+  const stats = await Movie.aggregate([
+    {
+      $addFields: {
+        ratingNum: { $toDouble: "$rating" }
+      }
+    },
+    { $match: { ratingNum: { $gte: 1 } } },
+    {
+      $group: {
+        _id: "$duration",
+        totalMovies: { $sum: 1 },
+        maxRating: { $max: "$ratingNum" },
+        maxDuration: { $max: "$duration" },
+        averageRating: { $avg: "$ratingNum" },
+        minimumDuration: { $min: "$duration" },
+      }
+    },
+    { $sort: { "maxRating": 1 } }
+  ]);
 
-    res.status(200).json({
-      status: "success1",
-      count: stats.length,
-      data: {
-        stats
-      },
-    })
+  res.status(200).json({
+    status: "success1",
+    count: stats.length,
+    data: {
+      stats
+    },
+  })
 });
 
 exports.getMovieByGenre = asyncWrapperFunction(async (req, res) => {
-    const genre = req.params.genre;
-    const result = await Movie.aggregate([
-      {
-        $unwind: {
-          path: "$genres",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $group: {
-          _id: "$genres",
-          movieCount: { $sum: 1 },
-          movies: { $push: "$name" },
-          releaseYear: {$push: "$releaseYear"}
-        }
-      },
-      { $addFields: { Genre: "$_id" } },
-      { $project: { Total: "$movieCount", Genre: 1, movies: 1, _id: 0, releaseYear: 1 }},
-      { $sort: { "Total": 1 } },
-      { $match: { Genre : genre}}
-    ])
+  const genre = req.params.genre;
+  const result = await Movie.aggregate([
+    {
+      $unwind: {
+        path: "$genres",
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $group: {
+        _id: "$genres",
+        movieCount: { $sum: 1 },
+        movies: { $push: "$name" },
+        releaseYear: { $push: "$releaseYear" }
+      }
+    },
+    { $addFields: { Genre: "$_id" } },
+    { $project: { Total: "$movieCount", Genre: 1, movies: 1, _id: 0, releaseYear: 1 } },
+    { $sort: { "Total": 1 } },
+    { $match: { Genre: genre } }
+  ])
 
-    res.status(200).json({
-      status: "success",
-      count: result.length,
-      data: {
-        result
-      },
-    })
+  res.status(200).json({
+    status: "success",
+    count: result.length,
+    data: {
+      result
+    },
+  })
 });
 
+exports.protect = asyncWrapperFunction(async (req, res, next) => {
+  // 1: Check token present or not,
+
+    const testToken = req.headers.authorization;
+    let token;
+ 
+    if (testToken && testToken.startsWith("Bearer ")) {
+      token = testToken.split(" ")[1];
+    }
+
+    if (!token) {
+      return next(new CustomError("You are not logged in!", 401));
+    }
+    // console.log(token)
+
+  // 2: validate the token.
+
+    try {
+      const decodedToken = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY)
+      console.log(decodedToken);
+    } catch (err) {
+      return next(err);
+    }
+
+    // try {
+    //   const decode = jwt.verify(token, process.env.SECRET_KEY);
+    //   console.log(decode)
+    // } catch (err) {
+    //   return next(err);
+    // }
+
+    // jwt.verify(token, process.env.SECRET_KEY, (err, data) => {
+    //   if (err) return next(err);
+    //   console.log(data);
+    // })
+
+  // 3; check whether user exist in the database or not. Say user get deleted immediately after login
+  // 4: Check if the user has changes the password after the token was issued
+  // 5: Allow user to access the data by just calling next middleware in the stack
+
+  return next();
+})
+
+// We will put ths middleware before the main middleware of the protected routes
+
+// Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX0lkIjoiNjg0ZDIxMTI5NWEwMDFmYjA2YjU3NmQ0IiwiZW1haWwiOiJzaGl2ZW5kcmF3azRAZ21haWwuY29tIiwiaWF0IjoxNzQ5OTAwOTc1LCJleHAiOjE3NDk5MDE4NzV9.76TY0LNDIW9qDwH8h--nf9VdWN5n0bpyVRHl8VwPqNo
