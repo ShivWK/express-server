@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
+// const crypto = require("crypto");
+
+// const key = crypto.randomBytes(64).toString("hex");
+// console.log(key)
 
 process.on("uncaughtException", (err) => {
   console.log(err.name, err.message);
