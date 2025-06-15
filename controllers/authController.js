@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const CustomError = require("./../Utils/CustomError");
 const util = require("util");
 const sendEmail = require("./../Utils/email");
+const crypto = require("crypto");
 
 const tokenGenerator = (payload, secretKey) => {
     const metadata = {
@@ -148,8 +149,6 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
     }
 
     const resetToken = await user.createRandomToken();
-    console.log(resetToken);
-
     await user.save({ validateBeforeSave: false });
 
     const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
@@ -172,11 +171,42 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
         await user.save({validateBeforeSave: false});
 
         console.log(err);
-
         return next(new CustomError("There was an error sending password reset email. Please try again later", 500))
     }
 })
 
-exports.passwordReset = (req, res, next) => {
+exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
+    const hashedResetToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
 
-}
+    const user = await User.findOne({passwordResetToken: hashedResetToken, passwordResetTokenExpiry: {$gt : Date.now()}});
+
+    if(!user) {
+        const err = new CustomError("Token is invalid or has expired");
+        return next(err);
+    }
+
+    console.log(user)
+    console.log(req.body)
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiry = undefined;
+    user.passwordChangedAt = Date.now();
+
+    await user.save();
+
+    const payload = {
+        user_id: user._id,
+        email: user.email,
+    }
+
+    const key = process.env.SECRET_KEY;
+
+    const token = tokenGenerator(payload, key);
+
+    res.status(200).json({
+        status: "success",
+        token
+    })
+})
