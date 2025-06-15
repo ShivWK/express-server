@@ -1,12 +1,18 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcryptjs = require("bcryptjs");
+const crypto = require("crypto"); 
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "Please provide name."],
         trim: true
+    },
+    role: {
+        type: String,
+        enum: ["admin", "user", "superUser"],
+        default: 'user',
     },
     email: {
         type: String,
@@ -35,7 +41,10 @@ const userSchema = new mongoose.Schema({
 
             // this validator will work for the save and create action but not for update by default we need to make validation: true in the update action then it will work there also
         }
-    }
+    },
+    passwordChangedAt : Date,
+    passwordResetToken: String,
+    passwordResetTokenExpiry: Date
 })
 
 userSchema.pre("save", async function(next) {
@@ -48,6 +57,27 @@ userSchema.pre("save", async function(next) {
 
 userSchema.methods.verifyThePassword = async function(lgPassword) {
     return await bcryptjs.compare(lgPassword, this.password);
+}
+
+userSchema.methods.verifyIsPasswordChanged = async function(JWTIssuedAt) {
+    if (this.passwordChangedAt) {
+        const passwordChangedTimeStamp = parseInt(this.passwordChangedAt.getTime()/1000, 10);
+        console.log(passwordChangedTimeStamp, JWTIssuedAt);
+
+        return JWTIssuedAt < passwordChangedTimeStamp;
+        // jo pehele bana hai uska timestamp bad me bane hue se jada hoga, isko aise smjhon ki kitna der hui bane
+    }
+
+    return false;
+}
+
+userSchema.methods.createRandomToken = async function() {
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    this.passwordResetTokenExpiry = Date.now() + 15*60*1000;
+
+    return resetToken;
 }
 
 

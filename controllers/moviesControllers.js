@@ -6,6 +6,7 @@ const asyncWrapperFunction = require("./../Utils/asyncErrorHandler");
 const CustomError = require("./../Utils/CustomError");
 const jwt = require("jsonwebtoken");
 const util = require("util");
+const User = require("./../Modals/userModel")
 
 // const file = JSON.parse(fs.readFileSync("./movies.json"));
 
@@ -428,49 +429,8 @@ exports.getMovieByGenre = asyncWrapperFunction(async (req, res) => {
   })
 });
 
-exports.protect = asyncWrapperFunction(async (req, res, next) => {
-  // 1: Check token present or not,
-
-    const testToken = req.headers.authorization;
-    let token;
- 
-    if (testToken && testToken.startsWith("Bearer ")) {
-      token = testToken.split(" ")[1];
-    }
-
-    if (!token) {
-      return next(new CustomError("You are not logged in!", 401));
-    }
-    // console.log(token)
-
-  // 2: validate the token.
-
-    try {
-      const decodedToken = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY)
-      console.log(decodedToken);
-    } catch (err) {
-      return next(err);
-    }
-
-    // try {
-    //   const decode = jwt.verify(token, process.env.SECRET_KEY);
-    //   console.log(decode)
-    // } catch (err) {
-    //   return next(err);
-    // }
-
-    // jwt.verify(token, process.env.SECRET_KEY, (err, data) => {
-    //   if (err) return next(err);
-    //   console.log(data);
-    // })
-
-  // 3; check whether user exist in the database or not. Say user get deleted immediately after login
-  // 4: Check if the user has changes the password after the token was issued
-  // 5: Allow user to access the data by just calling next middleware in the stack
-
-  return next();
-})
-
 // We will put ths middleware before the main middleware of the protected routes
 
 // Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX0lkIjoiNjg0ZDIxMTI5NWEwMDFmYjA2YjU3NmQ0IiwiZW1haWwiOiJzaGl2ZW5kcmF3azRAZ21haWwuY29tIiwiaWF0IjoxNzQ5OTAwOTc1LCJleHAiOjE3NDk5MDE4NzV9.76TY0LNDIW9qDwH8h--nf9VdWN5n0bpyVRHl8VwPqNo
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjg0ZGQ3NjE3NWUwNGM1MzFlOWMwNzlhIiwidXNlckVtYWlsIjoic2hpdmVuZHJhd2s4QGdtYWlsLmNvbSIsImlhdCI6MTc0OTkzMTg3MywiZXhwIjoxNzQ5OTMyNzczfQ.cxBQWmpbaUPozBV0cHMNrv3Qf-B_iLCpwOx5Lj2vQi0

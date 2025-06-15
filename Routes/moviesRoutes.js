@@ -13,8 +13,12 @@ const {
   queryProvider,
   getMovieStats,
   getMovieByGenre,
-  protect
 } = require("../controllers/moviesControllers");
+
+const {
+  protect,
+  restrict
+} = require("./../controllers/authController");
 
 // router.param("id", checkId);
 router.use(express.json());
@@ -34,6 +38,6 @@ router
   .get(getSingleMovie)
   .put(updateAMovieByPut)
   .patch(updateAmovieByPatch)
-  .delete(deleteAMovie);
+  .delete(protect ,restrict("superUser", "user"), deleteAMovie);
 
 module.exports = router;

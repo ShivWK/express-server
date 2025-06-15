@@ -65,7 +65,6 @@ module.exports = (err, _, res, next) => {
         if (er.name === "TokenExpiredError") er = tokenExpiredErrorHandler(er);
         if (er.name === "JsonWebTokenError") er = invalidTokenErrorHandler(er);
 
-
         prodError(res, er);
     }
 } 
