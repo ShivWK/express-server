@@ -56,7 +56,7 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
     }
 
     const isMatch = await user.verifyThePassword(password, user.password);
-    console.log(user)
+    console.log("Logged In User", user)
 
     if (isMatch) {
         const payload = {
@@ -95,7 +95,7 @@ exports.protect = asyncErrorHandler(async (req, res, next) => {
     // 2: validate the token.
 
     const decodedToken = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY)
-    console.log(decodedToken);
+    // console.log(decodedToken);
 
     // try {
     //   const decode = jwt.verify(token, process.env.SECRET_KEY);
@@ -185,9 +185,6 @@ exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
         return next(err);
     }
 
-    console.log(user)
-    console.log(req.body)
-
     user.password = req.body.password;
     user.confirmPassword = req.body.confirmPassword;
     user.passwordResetToken = undefined;
@@ -208,5 +205,46 @@ exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
     res.status(200).json({
         status: "success",
         token
+    })
+})
+
+exports.updatePassword = asyncErrorHandler( async (req, res, next) => {
+    const user = await User.findOne({_id: req.user.id}).select("+password");
+
+    const currentPassword = req.body.currentPassword;
+    const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+
+    if (!currentPassword || !password || !confirmPassword) {
+        return next(new CustomError("Please provide all current password, password, and confirm password", 401));
+    }
+
+    const isMatched = await user.verifyThePassword(currentPassword);
+
+    if(!isMatched) {
+        return next(new CustomError("Given current password doesn't match", 401));
+    }
+
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    user.passwordChangedAt = Date.now();
+
+    await user.save();
+
+    const payload = {
+        user_id: user._id,
+        email: user.email,
+    }
+
+    const key = process.env.SECRET_KEY;
+
+    const token = tokenGenerator(payload, key);
+
+    res.status(200).json({
+        status: "success",
+        token,
+        data: {
+            user: user
+        }
     })
 })

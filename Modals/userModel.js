@@ -62,7 +62,7 @@ userSchema.methods.verifyThePassword = async function(lgPassword) {
 userSchema.methods.verifyIsPasswordChanged = async function(JWTIssuedAt) {
     if (this.passwordChangedAt) {
         const passwordChangedTimeStamp = parseInt(this.passwordChangedAt.getTime()/1000, 10);
-        console.log(passwordChangedTimeStamp, JWTIssuedAt);
+        // console.log(passwordChangedTimeStamp, JWTIssuedAt);
 
         return JWTIssuedAt < passwordChangedTimeStamp;
         // jo pehele bana hai uska timestamp bad me bane hue se jada hoga, isko aise smjhon ki kitna der hui bane
