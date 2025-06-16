@@ -168,7 +168,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
     } catch (err) {
         user.passwordResetToken = undefined;
         user.passwordResetTokenExpiry = undefined;
-        await user.save({validateBeforeSave: false});
+        await user.save({ validateBeforeSave: false });
 
         console.log(err);
         return next(new CustomError("There was an error sending password reset email. Please try again later", 500))
@@ -178,9 +178,9 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
     const hashedResetToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
 
-    const user = await User.findOne({passwordResetToken: hashedResetToken, passwordResetTokenExpiry: {$gt : Date.now()}});
+    const user = await User.findOne({ passwordResetToken: hashedResetToken, passwordResetTokenExpiry: { $gt: Date.now() } });
 
-    if(!user) {
+    if (!user) {
         const err = new CustomError("Token is invalid or has expired");
         return next(err);
     }
@@ -208,8 +208,8 @@ exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
     })
 })
 
-exports.updatePassword = asyncErrorHandler( async (req, res, next) => {
-    const user = await User.findOne({_id: req.user.id}).select("+password");
+exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
+    const user = await User.findOne({ _id: req.user.id }).select("+password");
 
     const currentPassword = req.body.currentPassword;
     const password = req.body.password;
@@ -221,7 +221,7 @@ exports.updatePassword = asyncErrorHandler( async (req, res, next) => {
 
     const isMatched = await user.verifyThePassword(currentPassword);
 
-    if(!isMatched) {
+    if (!isMatched) {
         return next(new CustomError("Given current password doesn't match", 401));
     }
 
@@ -248,3 +248,39 @@ exports.updatePassword = asyncErrorHandler( async (req, res, next) => {
         }
     })
 })
+
+function filterReqObj(obj, ...allowedFields) {
+    let reqObj = {};
+    let keys = Object.keys(obj);
+
+    for (let key of keys) {
+        if (allowedFields.includes(key)) {
+            reqObj[key] = obj[key];
+        }
+    }
+
+    return reqObj;
+}
+
+exports.updateUserDetails = asyncErrorHandler(async (req, res, next) => {
+    if (req.body.password || req.body.confirmPassword) {
+        return next(new CustomError("You can't update password through this endpoint", 400));
+    }
+
+    if (Object.keys(req.body).length === 0) {
+        // body is never null it is always an object ,it can be an empty object because user not given anything but it will be an object and object is a truthy value , so we are checking the number opf keys in it.
+        return next(new CustomError("Please provide data to update", 400));
+    }
+
+    const filteredObject = filterReqObj(req.body, "name", "email");
+
+    const user = await User.findByIdAndUpdate(req.user.id, filteredObject, { runValidators: true, new: true });
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            user
+        }
+    })
+
+});
