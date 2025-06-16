@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
             // this validator will work for the save and create action but not for update by default we need to make validation: true in the update action then it will work there also
         }
     },
+    active: {
+        type: Boolean,
+        default: true,
+        select: false,
+    },
     passwordChangedAt : Date,
     passwordResetToken: String,
     passwordResetTokenExpiry: Date
@@ -54,6 +59,13 @@ userSchema.pre("save", async function(next) {
     this.password = await bcryptjs.hash(this.password, 12);
     this.confirmPassword = undefined;
 });
+
+userSchema.pre(/^find/, function(next) {
+    if(!this.getOptions().bypassFilter) {
+        this.find({active: true});
+    }
+    next();
+})
 
 userSchema.methods.verifyThePassword = async function(lgPassword) {
     return await bcryptjs.compare(lgPassword, this.password);

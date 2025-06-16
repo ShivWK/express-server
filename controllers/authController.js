@@ -208,6 +208,8 @@ exports.passwordReset = asyncErrorHandler(async (req, res, next) => {
     })
 })
 
+// Put below code in userController folder
+
 exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
     const user = await User.findOne({ _id: req.user.id }).select("+password");
 
@@ -284,3 +286,24 @@ exports.updateUserDetails = asyncErrorHandler(async (req, res, next) => {
     })
 
 });
+
+exports.deleteMeHandler = asyncErrorHandler(async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, {active: false});
+
+    res.status(204).json({
+        status: "success",
+        data: null
+    })
+});
+
+exports.getAllUsers = asyncErrorHandler(async (req, res, next) => {
+    const users = await User.find().setOptions({bypassFilter: true});
+
+    res.status(200).json({
+        status: "success",
+        total: users.length,
+        data: {
+            users
+        }
+    })
+})
